@@ -8,7 +8,7 @@ const findWord = async (req, res, next) => {
     }
 
     let client = await connect()
-    let word = req.params.word.trim()
+    let word = decodeURI(req.params.word.trim())
     
     const found = isMyanmar(word)
 
@@ -51,9 +51,10 @@ const resultWord = async (req,res,next) => {
 
     let wordsCollection = client.db().collection(dict);
 
-
+    let word = decodeURI(req.params.word.trim())
+    
     var result = await wordsCollection.findOne(
-        { word:req.params.word , type: 0 } ,
+        { word:word , type: 0 } ,
         { projection: { _id: 0 } }
     )
     
