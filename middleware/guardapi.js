@@ -22,7 +22,7 @@ const guard = async (req, res, next) => {
     const app_id = req.headers.app_id
 
     if (timestamp == undefined || hash == undefined || app_id == undefined) {
-        return invalidRes(res)
+        return invalidRes(res,timestamp + ":" + hash + ":" + app_id + ":")
     }
 
     const newtime = moment(timestamp, "X").add(3, "minutes").unix()
