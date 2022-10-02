@@ -1,5 +1,7 @@
 const crypto = require('crypto')
 var moment = require('moment')
+const dotenv = require('dotenv');
+dotenv.config()
 
 const invalidRes = (res) => {
     res.status(401).send({ error: "Invalid request" })
@@ -26,7 +28,7 @@ const guard = async (req, res, next) => {
         return invalidRes(res)
     }
 
-    const key = "69722703123"
+    const key = process.env.APP_KEY
     const original_string = app_id + ":" + timestamp
     const result = crypto.createHmac('sha1', key)
         .update(original_string)
