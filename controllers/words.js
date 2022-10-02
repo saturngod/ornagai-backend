@@ -13,7 +13,7 @@ const findWord = async (req, res, next) => {
     
     const redis = createClient();
     await redis.connect();
-    const cache = await redis.get(word)
+    const cache = await redis.get("find_" + word)
     if(cache != null) {
         console.log("CACHE RES")
         res.send(JSON.parse(cache))
@@ -42,7 +42,7 @@ const findWord = async (req, res, next) => {
 
     await client.close()
     
-    await redis.set(word,JSON.stringify({ result: data }))
+    await redis.set("find_" + word,JSON.stringify({ result: data }))
     await redis.quit()
     res.send({ result: data })
     res.end()
@@ -55,9 +55,18 @@ const resultWord = async (req,res,next) => {
         res.send({ result: null }, 200);
     }
 
-    console.log(req.params.word.trim())
+    let word = decodeURI(req.params.word.trim())
+    const redis = createClient();
+    await redis.connect();
+    const cache = await redis.get("def_" + word)
+    if(cache != null) {
+        console.log("CACHE RES")
+        res.send(JSON.parse(cache))
+        res.end()
+        return
+    }
 
-    const myan = isMyanmar(req.params.word.trim())
+    const myan = isMyanmar(word)
 
     var dict = "dict"
     if(myan) {
@@ -66,13 +75,16 @@ const resultWord = async (req,res,next) => {
 
     let wordsCollection = client.db().collection(dict);
 
-    let word = decodeURI(req.params.word.trim())
+    
     
     var result = await wordsCollection.findOne(
         { word:word } ,
         { projection: { _id: 0 } }
     )
     
+    await redis.set("def_" + word,JSON.stringify({ result: result }))
+    await redis.quit()
+
     res.send({ result: result })
     res.end()
 }

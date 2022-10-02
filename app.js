@@ -19,7 +19,7 @@ app.set('view engine', 'jade');
 
 
 app.use(cors({
-    origin: process.env.HOST + ':' + process.env.PORT
+    origin: process.env.FRONT_END_URL
 }));
 
 app.use(logger('dev'));
