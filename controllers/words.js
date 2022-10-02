@@ -1,5 +1,6 @@
 const { connect } = require("../db/mongodb")
 const {isMyanmar} = require("../Utils/myanmar")
+const {createClient} = require("redis")
 
 const findWord = async (req, res, next) => {
     
@@ -10,6 +11,16 @@ const findWord = async (req, res, next) => {
     let client = await connect()
     let word = decodeURI(req.params.word.trim())
     
+    const redis = createClient();
+    await redis.connect();
+    const cache = await redis.get(word)
+    if(cache != null) {
+        console.log("CACHE RES")
+        res.send(JSON.parse(cache))
+        res.end()
+        return
+    }
+
     const found = isMyanmar(word)
 
     var db = "english"
@@ -30,7 +41,9 @@ const findWord = async (req, res, next) => {
     var data = result.map((value) => value.word)
 
     await client.close()
-
+    
+    await redis.set(word,JSON.stringify({ result: data }))
+    await redis.quit()
     res.send({ result: data })
     res.end()
 }
@@ -41,6 +54,8 @@ const resultWord = async (req,res,next) => {
     if (req.params.word.trim() == "") {
         res.send({ result: null }, 200);
     }
+
+    console.log(req.params.word.trim())
 
     const myan = isMyanmar(req.params.word.trim())
 
@@ -54,7 +69,7 @@ const resultWord = async (req,res,next) => {
     let word = decodeURI(req.params.word.trim())
     
     var result = await wordsCollection.findOne(
-        { word:word , type: 0 } ,
+        { word:word } ,
         { projection: { _id: 0 } }
     )
     
