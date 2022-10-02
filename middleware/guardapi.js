@@ -3,8 +3,11 @@ var moment = require('moment')
 const dotenv = require('dotenv');
 dotenv.config()
 
-const invalidRes = (res) => {
-    res.status(401).send({ error: "Invalid request" })
+const invalidRes = (res,message = "") => {
+    if(message == "") {
+       message = "Invalid Request"
+    }
+    res.status(401).send({ error: message })
     res.end()
     return
 }
@@ -25,7 +28,7 @@ const guard = async (req, res, next) => {
     const newtime = moment(timestamp, "X").add(3, "minutes").unix()
 
     if (newtime < time) {
-        return invalidRes(res)
+        return invalidRes(res,"expire request")
     }
 
     const key = process.env.APP_KEY
@@ -35,7 +38,7 @@ const guard = async (req, res, next) => {
         .digest('hex')
 
     if (hash != result) {
-        return invalidRes(res)
+        return invalidRes(res,"invalid hash")
     }
     else {
         next()
