@@ -1,8 +1,10 @@
 const {MongoClient} = require('mongodb');
+const dotenv = require('dotenv');
+
 
 const connect = async () => {
-
-    var url = "mongodb://localhost:27017/watermelon";
+    dotenv.config()
+    var url = process.env.MONGODB;
     const client = new MongoClient(url);
     try {
         await client.connect()

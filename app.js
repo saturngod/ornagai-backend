@@ -7,8 +7,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 var indexRouter = require('./routes/index');
 var apiRouter = require('./routes/api');
-
+const dotenv = require('dotenv');
 var app = express();
+
+
+dotenv.config()
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -16,7 +19,7 @@ app.set('view engine', 'jade');
 
 
 app.use(cors({
-    origin: 'http://localhost:3001'
+    origin: process.env.HOST + ':' + process.env.PORT
 }));
 
 app.use(logger('dev'));
